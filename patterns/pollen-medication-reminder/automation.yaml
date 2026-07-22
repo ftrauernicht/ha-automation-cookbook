@@ -1,0 +1,28 @@
+automation:
+  - alias: "Pollen Medication Reminder"
+    description: >-
+      Checks tomorrow's pollen forecast (built on the DWD sensor from the
+      dwd-pollen-and-school-holidays pattern) and reminds you the night
+      before if the forecast meets or exceeds a medium load, so you can
+      take an allergy medication in advance if you use one.
+    triggers:
+      - trigger: time
+        at: "20:00:00"
+    variables:
+      # DWD's own tiers, from lowest to highest load.
+      tiers: ["0", "0-1", "1", "1-2", "2", "2-3", "3"]
+      # Anything at this index or higher counts as "medium-to-high".
+      medium_index: 3
+      tomorrow_level: "{{ states('sensor.grass_pollen_tomorrow') }}"
+      tomorrow_index: "{{ tiers.index(tomorrow_level) if tomorrow_level in tiers else -1 }}"
+    conditions:
+      - condition: template
+        value_template: "{{ tomorrow_index >= medium_index }}"
+    actions:
+      - action: notify.mobile_app_example  # replace with your own notify.mobile_app_* target
+        data:
+          title: "Pollen forecast reminder"
+          message: >-
+            Tomorrow's grass pollen forecast is medium-to-high — take your
+            allergy medication tonight if you use one.
+    mode: single

@@ -1,0 +1,52 @@
+# Raspberry Pi CPU temperature sensor (companion to the two automations below).
+# Reads the Pi's CPU thermal zone directly — no extra integration needed.
+command_line:
+  - sensor:
+      name: "Raspberry Pi CPU Temperature"
+      unique_id: rpi_cpu_temperature
+      command: "cat /sys/class/thermal/thermal_zone0/temp"
+      unit_of_measurement: "°C"
+      device_class: temperature
+      state_class: measurement
+      value_template: "{{ value | float / 1000 }}"
+      scan_interval: 60
+
+automation:
+  - alias: "Cooling Fan - Turn On Above High Threshold"
+    description: >-
+      Turns the fan on once the CPU gets hot. Paired with the "Turn Off Below
+      Low Threshold" automation below — the gap between the two thresholds
+      (hysteresis) stops the fan flapping on/off right at one boundary value.
+    triggers:
+      - trigger: numeric_state
+        entity_id: sensor.raspberry_pi_cpu_temperature
+        above: 65
+    conditions:
+      - condition: state
+        entity_id: switch.cooling_fan
+        state: "off"
+    actions:
+      - action: switch.turn_on
+        target:
+          entity_id: switch.cooling_fan
+    mode: single
+
+  - alias: "Cooling Fan - Turn Off Below Low Threshold"
+    description: >-
+      Turns the fan off once the CPU has cooled down well past the point it
+      turned on — deliberately a lower threshold than the "on" automation
+      (65°C on, 50°C off) so the fan doesn't rapidly cycle at a single
+      boundary temperature.
+    triggers:
+      - trigger: numeric_state
+        entity_id: sensor.raspberry_pi_cpu_temperature
+        below: 50
+    conditions:
+      - condition: state
+        entity_id: switch.cooling_fan
+        state: "on"
+    actions:
+      - action: switch.turn_off
+        target:
+          entity_id: switch.cooling_fan
+    mode: single

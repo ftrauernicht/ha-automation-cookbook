@@ -1,0 +1,52 @@
+automation:
+  - alias: "Low Battery Fleet Report"
+    description: >-
+      Daily scan of every sensor.* entity with device_class: battery.
+      Builds a warning list (below 20%) and a critical list (below 10%),
+      skipping any sensor whose state isn't a clean number (unavailable,
+      unknown, or garbage), so one flaky battery sensor can't crash the
+      whole report.
+    triggers:
+      - trigger: time
+        at: "10:00:00"
+    variables:
+      # Entity ids or name fragments to skip entirely — some devices report
+      # battery % erratically and just create noise in the report.
+      excluded_entities: []
+      warning_threshold: 20
+      critical_threshold: 10
+      battery_sensors: >-
+        {{ states.sensor
+           | selectattr('attributes.device_class', 'defined')
+           | selectattr('attributes.device_class', 'eq', 'battery')
+           | rejectattr('entity_id', 'in', excluded_entities)
+           | selectattr('state', 'match', '^[0-9]+(\.[0-9]+)?$')
+           | list }}
+      low_battery:
+        "{{ battery_sensors | selectattr('state', 'lt', warning_threshold | string) | list }}"
+      critical:
+        "{{ low_battery | selectattr('state', 'lt', critical_threshold | string) | list }}"
+      warning:
+        "{{ low_battery | rejectattr('entity_id', 'in', critical | map(attribute='entity_id') | list) | list }}"
+    conditions:
+      - condition: template
+        value_template: "{{ low_battery | length > 0 }}"
+    actions:
+      - action: notify.mobile_app_example  # replace with your own notify.mobile_app_* target
+        data:
+          title: "Low battery report"
+          message: >-
+            {% if critical | length > 0 %}
+            Critical (<{{ critical_threshold }}%): {{ critical | map(attribute='name') | join(', ') }}.
+            {% endif %}
+            {% if warning | length > 0 %}
+            Low (<{{ warning_threshold }}%): {{ warning | map(attribute='name') | join(', ') }}.
+            {% endif %}
+      - action: persistent_notification.create
+        data:
+          title: "Low battery report"
+          message: >-
+            {% for s in low_battery %}
+            - {{ s.name }}: {{ s.state }}%
+            {% endfor %}
+    mode: single

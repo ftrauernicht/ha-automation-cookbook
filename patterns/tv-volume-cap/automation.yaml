@@ -1,0 +1,52 @@
+input_number:
+  tv_volume_limit:
+    name: "TV Volume Limit"
+    min: 0
+    max: 100
+    step: 1
+    initial: 100
+    unit_of_measurement: "%"
+
+automation:
+  - alias: "TV Volume Cap - Enforce Limit"
+    description: >-
+      Re-clamps the TV's volume back down to input_number.tv_volume_limit
+      whenever either the player's volume changes OR the limit itself
+      changes. Uses a small epsilon tolerance so the clamp action's own
+      volume-set doesn't immediately re-trigger this automation in an
+      infinite loop.
+    triggers:
+      - trigger: state
+        entity_id: media_player.living_room_tv
+        attribute: volume_level
+      - trigger: state
+        entity_id: input_number.tv_volume_limit
+    variables:
+      limit: "{{ states('input_number.tv_volume_limit') | float / 100 }}"
+      current: "{{ state_attr('media_player.living_room_tv', 'volume_level') | float(0) }}"
+    conditions:
+      - condition: template
+        value_template: "{{ (current - limit) > 0.02 }}"
+    actions:
+      - action: media_player.volume_set
+        target:
+          entity_id: media_player.living_room_tv
+        data:
+          volume_level: "{{ limit }}"
+    mode: single
+
+  - alias: "TV Volume Cap - Nightly Reset"
+    description: >-
+      Resets the limit helper back to 100% (fully open) every night, so a
+      stricter daytime cap doesn't silently persist forever — re-apply it
+      whenever you actually want it active.
+    triggers:
+      - trigger: time
+        at: "00:00:00"
+    actions:
+      - action: input_number.set_value
+        target:
+          entity_id: input_number.tv_volume_limit
+        data:
+          value: 100
+    mode: single

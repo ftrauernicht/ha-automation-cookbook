@@ -1,0 +1,42 @@
+# Attach an `azimuth` attribute (compass degrees the window/facade faces,
+# 0-359) to any cover/window entity you want this automation to consider.
+# Only entities carrying this attribute are included — no hardcoded list.
+homeassistant:
+  customize:
+    cover.living_room:
+      azimuth: 180
+    cover.office:
+      azimuth: 90
+
+automation:
+  - alias: "Sun-Exposed Windows Notification"
+    description: >-
+      Standalone notification-only version of the "which windows are
+      currently getting direct sun" idea. Does not control any covers
+      itself — see the hassio-sun-blind-automation repo for the full
+      auto-close system this calc is drawn from.
+    triggers:
+      - trigger: numeric_state
+        entity_id: sensor.outside_temperature
+        above: 24
+    conditions: []
+    variables:
+      sun_azimuth: "{{ state_attr('sun.sun', 'azimuth') }}"
+      exposed: >-
+        {% set ns = namespace(items=[]) %}
+        {% for entity in states.cover | selectattr('attributes.azimuth', 'defined') | list %}
+          {% set diff = (sun_azimuth - entity.attributes.azimuth) % 360 %}
+          {% set diff = diff if diff <= 180 else 360 - diff %}
+          {% if diff <= 90 %}
+            {% set ns.items = ns.items + [entity.name] %}
+          {% endif %}
+        {% endfor %}
+        {{ ns.items }}
+    actions:
+      - condition: template
+        value_template: "{{ exposed | length > 0 }}"
+      - action: notify.mobile_app_example  # replace with your own notify.mobile_app_* target
+        data:
+          title: "Sun-exposed windows"
+          message: "Currently getting direct sun: {{ exposed | join(', ') }}."
+    mode: single

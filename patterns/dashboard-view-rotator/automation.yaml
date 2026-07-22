@@ -1,0 +1,28 @@
+input_select:
+  dashboard_view_rotator:
+    name: "Dashboard View Rotator"
+    options:
+      - "energy"
+      - "camera1"
+      - "camera2"
+    initial: "energy"
+
+automation:
+  - alias: "Dashboard View Rotator"
+    description: >-
+      Cycles input_select.dashboard_view_rotator through its options on a
+      randomized 30-50 second interval, instead of a fixed period — meant to
+      drive a Lovelace conditional/state-switch card that shows different
+      content depending on this helper's current value. The display side
+      (the actual card) isn't part of this pattern; any card that reacts to
+      an input_select works.
+    triggers:
+      - trigger: state
+        entity_id: input_select.dashboard_view_rotator
+        for:
+          seconds: "{{ range(30, 51) | random }}"
+    actions:
+      - action: input_select.select_next
+        target:
+          entity_id: input_select.dashboard_view_rotator
+    mode: single

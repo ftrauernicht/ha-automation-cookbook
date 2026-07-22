@@ -1,0 +1,48 @@
+automation:
+  - alias: "TV Ambient Bias Lighting"
+    description: >-
+      Syncs a bias/accent light to a preset scene when the living room TV
+      turns on while it's dark, and turns it back off when the TV turns off
+      or it becomes light outside — whichever happens first.
+    triggers:
+      - trigger: state
+        entity_id: media_player.living_room_tv
+        to: "on"
+        id: "tv_on"
+      - trigger: state
+        entity_id: media_player.living_room_tv
+        to: "off"
+        id: "tv_off"
+      - trigger: sun
+        event: sunrise
+        id: "became_light"
+    conditions: []
+    actions:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: "tv_on"
+              - condition: sun
+                after: sunset
+                before: sunrise
+            sequence:
+              - delay:
+                  seconds: 2
+              - action: light.turn_on
+                target:
+                  entity_id: light.tv_bias_light
+                data:
+                  brightness_pct: 15
+                  color_name: "warm_white"
+          - conditions:
+              - condition: or
+                conditions:
+                  - condition: trigger
+                    id: "tv_off"
+                  - condition: trigger
+                    id: "became_light"
+            sequence:
+              - action: light.turn_off
+                target:
+                  entity_id: light.tv_bias_light
+    mode: single

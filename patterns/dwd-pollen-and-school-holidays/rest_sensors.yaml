@@ -1,0 +1,54 @@
+# Germany-specific. Both sensors below need their region/subdivision values
+# replaced with your own before they'll mean anything for your location.
+
+rest:
+  # --- DWD (Deutscher Wetterdienst) grass pollen forecast ---
+  # Free, no API key. Example region_id/partregion_id below are placeholders —
+  # look up your own region/subregion from DWD's published pollen region list
+  # before using this for real.
+  - resource: "https://opendata.dwd.de/climate_environment/health/alerts/s31fg.json"
+    scan_interval: 21600 # 6h — DWD publishes new data roughly twice daily
+    sensor:
+      - name: "Grass Pollen Today"
+        unique_id: grass_pollen_today
+        icon: mdi:grass
+        value_template: >-
+          {% set ns = namespace(val='0') %}
+          {% for r in value_json.content %}
+            {% if r.region_id == 1 and r.partregion_id == -1 %}  {# <-- replace with your own region/subregion #}
+              {% set ns.val = r.Pollen.Graeser.today %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.val }}
+      - name: "Grass Pollen Tomorrow"
+        unique_id: grass_pollen_tomorrow
+        icon: mdi:grass
+        value_template: >-
+          {% set ns = namespace(val='0') %}
+          {% for r in value_json.content %}
+            {% if r.region_id == 1 and r.partregion_id == -1 %}  {# <-- replace with your own region/subregion #}
+              {% set ns.val = r.Pollen.Graeser.tomorrow %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.val }}
+
+  # --- openholidaysapi.org school holidays ---
+  # Free, no API key. subdivisionCode below (DE-BY = Bavaria) is just an
+  # example — replace with your own German state (or another supported
+  # country's countryIsoCode + subdivisionCode).
+  - resource_template: >-
+      https://openholidaysapi.org/SchoolHolidays?countryIsoCode=DE&languageIsoCode=DE&validFrom={{ now().strftime('%Y-%m-%d') }}&validTo={{ (now() + timedelta(days=3)).strftime('%Y-%m-%d') }}&subdivisionCode=DE-BY
+    scan_interval: 21600 # 6h — holiday dates don't change intraday
+    binary_sensor:
+      - name: "School Holiday Tomorrow"
+        unique_id: school_holiday_tomorrow
+        device_class: problem
+        value_template: >-
+          {% set tomorrow = (now() + timedelta(days=1)).date() %}
+          {% set ns = namespace(found=false) %}
+          {% for p in value_json %}
+            {% set s = strptime(p.startDate, '%Y-%m-%d').date() %}
+            {% set e = strptime(p.endDate, '%Y-%m-%d').date() %}
+            {% if s <= tomorrow <= e %}{% set ns.found = true %}{% endif %}
+          {% endfor %}
+          {{ ns.found }}
