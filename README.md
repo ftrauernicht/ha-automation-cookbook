@@ -1,4 +1,4 @@
-# hassio-automation-cookbook
+# ha-automation-cookbook
 
 A grab-bag of independent, copy-pasteable Home Assistant automation
 patterns. Each one solves its own problem and stands alone — this isn't one
@@ -15,7 +15,7 @@ you; none of them depend on each other.
 | [`dashboard-view-rotator`](patterns/dashboard-view-rotator) | Randomized-interval `input_select` rotation to drive a dashboard view switcher | Display card not included |
 | [`tv-volume-cap`](patterns/tv-volume-cap) | Parental/guest volume limiter for any media_player, with nightly reset | |
 | [`tv-ambient-bias-lighting`](patterns/tv-ambient-bias-lighting) | Syncs an accent light to the TV turning on/off in the dark | |
-| [`sun-exposed-windows-notification`](patterns/sun-exposed-windows-notification) | Notifies which windows are currently sun-exposed | Standalone version of a calc used in `hassio-sun-blind-automation` |
+| [`sun-exposed-windows-notification`](patterns/sun-exposed-windows-notification) | Notifies which windows are currently sun-exposed | Standalone version of a calc used in `ha-sun-blind-automation` |
 | [`dwd-pollen-and-school-holidays`](patterns/dwd-pollen-and-school-holidays) | REST sensors for German pollen forecast + school holidays | Germany-specific |
 | [`pollen-medication-reminder`](patterns/pollen-medication-reminder) | Evening reminder based on tomorrow's pollen forecast | Germany-specific (depends on the pattern above) |
 
@@ -32,17 +32,17 @@ own setup.
 
 - [`sun-exposed-windows-notification`](patterns/sun-exposed-windows-notification)
   is a lightweight standalone cousin of
-  [hassio-sun-blind-automation](https://github.com/ftrauernicht/hassio-sun-blind-automation)'s
+  [ha-sun-blind-automation](https://github.com/ftrauernicht/ha-sun-blind-automation)'s
   full sun-based blind-control system — start here if you just want the
   notification, graduate to the full repo if you want blinds that move
   themselves.
 - [`dashboard-view-rotator`](patterns/dashboard-view-rotator)'s automation
-  half is here; the Lovelace card side isn't included in any `hassio-*`
+  half is here; the Lovelace card side isn't included in any `ha-*`
   repo currently.
 
-Part of the `hassio-*` Home Assistant toolkit — see also
-[hassio-dashboard-recipes](https://github.com/ftrauernicht/hassio-dashboard-recipes)
-and [hassio-sun-blind-automation](https://github.com/ftrauernicht/hassio-sun-blind-automation).
+Part of the `ha-*` Home Assistant toolkit — see also
+[ha-dashboard-recipes](https://github.com/ftrauernicht/ha-dashboard-recipes)
+and [ha-sun-blind-automation](https://github.com/ftrauernicht/ha-sun-blind-automation).
 
 ## Contributing
 

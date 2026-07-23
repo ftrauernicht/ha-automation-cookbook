@@ -13,7 +13,7 @@ automation:
     description: >-
       Standalone notification-only version of the "which windows are
       currently getting direct sun" idea. Does not control any covers
-      itself — see the hassio-sun-blind-automation repo for the full
+      itself — see the ha-sun-blind-automation repo for the full
       auto-close system this calc is drawn from.
     triggers:
       - trigger: numeric_state

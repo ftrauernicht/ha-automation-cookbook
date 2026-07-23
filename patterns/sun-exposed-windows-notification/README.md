@@ -28,7 +28,7 @@ wants it without adopting a full blind-control system.
 ## Related
 
 This is a deliberately lightweight, standalone cousin of the full
-[`hassio-sun-blind-automation`](https://github.com/ftrauernicht/hassio-sun-blind-automation)
+[`ha-sun-blind-automation`](https://github.com/ftrauernicht/ha-sun-blind-automation)
 repo, which reuses this same azimuth-diff calculation but goes further:
 automatically closing/reopening blinds, tracking manual overrides, and
 per-cover target positions. Start here if you just want the notification;
