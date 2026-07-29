@@ -1,5 +1,8 @@
 # ha-automation-cookbook
 
+[![Validate](https://github.com/ftrauernicht/ha-automation-cookbook/actions/workflows/validate.yml/badge.svg)](https://github.com/ftrauernicht/ha-automation-cookbook/actions/workflows/validate.yml)
+[![License: MIT](https://img.shields.io/github/license/ftrauernicht/ha-automation-cookbook)](LICENSE)
+
 A grab-bag of independent, copy-pasteable Home Assistant automation
 patterns. Each one solves its own problem and stands alone — this isn't one
 cohesive system, just a collection of small, generalizable tricks found
